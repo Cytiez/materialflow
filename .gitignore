@@ -1,0 +1,29 @@
+# Environment variables — JANGAN PERNAH DI-COMMIT
+.env
+.env.local
+.env.production
+.env.development
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Upload files dari user
+server/uploads/
+
+# Build output
+client/dist/
+client/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
