@@ -1,3 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Outfit:wght@300;400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --parchment: #EDE8DF;
+  --forest: #1A3320;
+  --terracotta: #C4613A;
+  --soil: #221E18;
+  --stone: #7A6E63;
+  --moss: #3D6B4F;
+  --cream: #F5F0E8;
+  --deep-forest: #1C3520;
+  --sage: #4A7C59;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-sans text-body antialiased;
+    color: var(--soil);
+  }
+
+  h1 { @apply text-headline-lg text-soil; }
+  h2 { @apply text-headline-md text-soil; }
+  h3 { @apply text-headline-sm text-soil; }
+  h4 { @apply text-[16px] font-bold text-on-surface; }
+}
+
+@layer components {
+  /* Grotesque numbers — editorial impact */
+  .grotesque-num {
+    font-family: "Archivo Black", sans-serif;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+
+  /* Label uppercase kecil */
+  .label-caps {
+    @apply text-label-sm uppercase text-moss font-bold;
+    letter-spacing: 0.15em;
+  }
+
+  /* Card — tonal layering */
+  .card {
+    @apply bg-cream rounded-lg border border-outline p-6;
+  }
+  .card-white {
+    @apply bg-surface-white rounded-lg border border-outline p-6;
+  }
+
+  /* Button primary — forest green */
+  .btn-primary {
+    @apply bg-forest text-white font-semibold px-5 py-2.5 rounded-lg transition-all
+           disabled:opacity-50 disabled:cursor-not-allowed
+           hover:brightness-110;
+  }
+
+  /* Button CTA — terracotta */
+  .btn-cta {
+    @apply bg-terracotta text-white font-bold px-5 py-3 rounded-lg transition-all
+           disabled:opacity-50 disabled:cursor-not-allowed
+           hover:brightness-110;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+
+  /* Button secondary — outline style */
+  .btn-secondary {
+    @apply border border-outline-strong text-soil font-semibold px-5 py-2.5 rounded-lg
+           hover:bg-cream active:bg-surface-high transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Button ghost */
+  .btn-ghost {
+    @apply text-moss font-semibold px-2 py-1 transition-colors
+           hover:brightness-75;
+  }
+
+  /* Input field */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 rounded-lg border border-outline-strong bg-white/50 text-on-surface
+           placeholder:text-stone/50
+           focus:outline-none focus:ring-1 focus:ring-moss
+           transition-colors text-[13px];
+  }
+
+  /* Select field */
+  .select-field {
+    @apply w-full px-3.5 py-2.5 rounded-lg border border-outline-strong bg-white/50 text-on-surface
+           focus:outline-none focus:ring-1 focus:ring-moss
+           transition-colors appearance-none text-[13px];
+  }
+}
+
+/* Leaflet z-index fix */
+.leaflet-container {
+  z-index: 0;
+}
+
+/* Scrollbar styling — moss green */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--moss);
+  border-radius: 10px;
+}

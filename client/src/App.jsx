@@ -1,121 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import Sidebar from './components/layout/Sidebar';
+import Navbar from './components/layout/Navbar';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+import LoadingSpinner from './components/common/LoadingSpinner';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Pages
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import ListingsPage from './pages/ListingsPage';
+import MyListingsPage from './pages/MyListingsPage';
+import CreateListingPage from './pages/CreateListingPage';
+import ListingDetailPage from './pages/ListingDetailPage';
+import EditListingPage from './pages/EditListingPage';
+import MatchResultsPage from './pages/MatchResultsPage';
+import RequestsPage from './pages/RequestsPage';
+import MyRequestsPage from './pages/MyRequestsPage';
+import CreateRequestPage from './pages/CreateRequestPage';
+import RequestDetailPage from './pages/RequestDetailPage';
+import EditRequestPage from './pages/EditRequestPage';
+import ImpactPage from './pages/ImpactPage';
+import ProfilePage from './pages/ProfilePage';
+import ReceiverProfilePage from './pages/ReceiverProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
 
+// Layout utama: sidebar + navbar + content area
+function AppLayout() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex-1 ml-sidebar">
+        <Navbar />
+        <main className="p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
 }
 
-export default App
+// Guest layout — tanpa sidebar (login, register, landing)
+function GuestRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <LoadingSpinner fullScreen />;
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+export default function App() {
+  const { loading } = useAuth();
+
+  if (loading) return <LoadingSpinner fullScreen />;
+
+  return (
+    <Routes>
+      {/* Public routes — tanpa sidebar */}
+      <Route path="/" element={<GuestRoute><LandingPage /></GuestRoute>} />
+      <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+      <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+
+      {/* Protected routes — dengan sidebar */}
+      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+
+        {/* Listings */}
+        <Route path="/listings" element={<ListingsPage />} />
+        <Route path="/listings/my" element={<ProtectedRoute roles={['sender']}><MyListingsPage /></ProtectedRoute>} />
+        <Route path="/listings/create" element={<ProtectedRoute roles={['sender']}><CreateListingPage /></ProtectedRoute>} />
+        <Route path="/listings/:id" element={<ListingDetailPage />} />
+        <Route path="/listings/:id/edit" element={<ProtectedRoute roles={['sender']}><EditListingPage /></ProtectedRoute>} />
+        <Route path="/listings/:id/matches" element={<MatchResultsPage />} />
+
+        {/* Requests */}
+        <Route path="/requests" element={<RequestsPage />} />
+        <Route path="/requests/my" element={<ProtectedRoute roles={['receiver']}><MyRequestsPage /></ProtectedRoute>} />
+        <Route path="/requests/create" element={<ProtectedRoute roles={['receiver']}><CreateRequestPage /></ProtectedRoute>} />
+        <Route path="/requests/:id" element={<RequestDetailPage />} />
+        <Route path="/requests/:id/edit" element={<ProtectedRoute roles={['receiver']}><EditRequestPage /></ProtectedRoute>} />
+
+        {/* Impact */}
+        <Route path="/impact" element={<ImpactPage />} />
+
+        {/* Profile */}
+        <Route path="/profile" element={<ProfilePage />} />
+
+        {/* Receiver profile */}
+        <Route path="/receivers/:id" element={<ReceiverProfilePage />} />
+      </Route>
+
+      {/* 404 */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
