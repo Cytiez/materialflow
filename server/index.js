@@ -1,45 +1,76 @@
-const express = require('express')
-const cors = require('cors')
-const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
-const dotenv = require('dotenv')
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const dotenv = require('dotenv');
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
-const PORT = process.env.PORT || 5000
+const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Security middleware
-app.use(helmet())
+app.use(helmet());
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+if (!process.env.CLIENT_URL) {
+  console.warn('⚠️  CLIENT_URL tidak di-set di .env, menggunakan default:', clientUrl);
+}
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: clientUrl,
   credentials: true
-}))
-app.use(express.json())
-app.use('/uploads', express.static('uploads'))
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static files — foto upload
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rate limiting global
+// Dev: 500 req/15min — Production: 100 req/15min
+const isDev = process.env.NODE_ENV !== 'production';
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { success: false, message: 'Terlalu banyak request, coba lagi nanti' }
-})
-app.use('/api', limiter)
+  max: isDev ? 500 : 100,
+  message: { success: false, message: 'Terlalu banyak request, coba lagi nanti.' }
+});
+app.use('/api', limiter);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'MaterialFlow API berjalan' })
-})
+  res.json({ success: true, message: 'MaterialFlow API berjalan.' });
+});
 
-// Error handler global
+// Routes
+const authRoutes = require('./routes/auth');
+const categoriesRoutes = require('./routes/categories');
+const listingsRoutes = require('./routes/listings');
+const requestsRoutes = require('./routes/requests');
+const matchesRoutes = require('./routes/matches');
+const impactRoutes = require('./routes/impact');
+const contactRoutes = require('./routes/contact');
+const profileRoutes = require('./routes/profile');
+const receiversRoutes = require('./routes/receivers');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/listings', listingsRoutes);
+app.use('/api/requests', requestsRoutes);
+app.use('/api', matchesRoutes);
+app.use('/api/impact', impactRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/receivers', receiversRoutes);
+
+// Error handler global — jangan expose stack trace ke client
 app.use((err, req, res, next) => {
-  console.error(err.stack)
+  console.error(err.stack);
   res.status(500).json({
     success: false,
-    message: 'Terjadi kesalahan pada server'
-  })
-})
+    message: 'Terjadi kesalahan pada server.'
+  });
+});
 
 app.listen(PORT, () => {
-  console.log(`Server berjalan di port ${PORT}`)
-})
+  console.log(`Server berjalan di port ${PORT}`);
+});

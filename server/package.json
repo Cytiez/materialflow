@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "node index.js",
-      "dev": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate": "psql -d $DATABASE_URL -f db/migrations.sql",
+    "seed": "node db/seed.js"
   },
   "keywords": [],
   "author": "",
