@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import Sidebar from './components/layout/Sidebar';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -50,7 +52,7 @@ function GuestRoute({ children }) {
   return children;
 }
 
-export default function App() {
+function App() {
   const { loading } = useAuth();
 
   if (loading) return <LoadingSpinner fullScreen />;
@@ -94,5 +96,16 @@ export default function App() {
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+  );
+}
+
+// Wrap dengan ToastProvider + ErrorBoundary
+export default function AppWithProviders() {
+  return (
+    <ToastProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </ToastProvider>
   );
 }

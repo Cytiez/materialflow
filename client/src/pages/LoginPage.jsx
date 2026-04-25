@@ -145,32 +145,37 @@ export default function LoginPage() {
 
           {/* Demo accounts */}
           <div className="mt-8 p-4 rounded-md bg-cream border border-outline">
-            <p className="text-label-sm text-stone font-semibold uppercase tracking-wide mb-3">
-              Akun Demo
-            </p>
-            <div className="grid grid-cols-2 gap-3 text-[12px]">
-              <div>
-                <p className="text-stone mb-0.5 font-medium">Sender</p>
-                <button
-                  type="button"
-                  onClick={() => setForm({ email: 'mebeljaya@demo.com', password: 'Demo1234!' })}
-                  className="text-moss hover:underline text-left"
-                >
-                  mebeljaya@demo.com
-                </button>
-              </div>
-              <div>
-                <p className="text-stone mb-0.5 font-medium">Receiver</p>
-                <button
-                  type="button"
-                  onClick={() => setForm({ email: 'papanjaya@demo.com', password: 'Demo1234!' })}
-                  className="text-moss hover:underline text-left"
-                >
-                  papanjaya@demo.com
-                </button>
-              </div>
-            </div>
-            <p className="text-[11px] text-stone/50 mt-2">Password: Demo1234!</p>
+            {/* FIX 9: Tombol demo hanya muncul di development */}
+            {import.meta.env.DEV && (
+              <>
+                <p className="text-label-sm text-stone font-semibold uppercase tracking-wide mb-3">
+                  Akun Demo
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-[12px]">
+                  <div>
+                    <p className="text-stone mb-0.5 font-medium">Sender</p>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ email: 'mebeljaya@demo.com', password: 'Demo1234!' })}
+                      className="text-moss hover:underline text-left"
+                    >
+                      mebeljaya@demo.com
+                    </button>
+                  </div>
+                  <div>
+                    <p className="text-stone mb-0.5 font-medium">Receiver</p>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ email: 'papanjaya@demo.com', password: 'Demo1234!' })}
+                      className="text-moss hover:underline text-left"
+                    >
+                      papanjaya@demo.com
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[11px] text-stone/50 mt-2">Password: Demo1234!</p>
+              </>
+            )}
           </div>
 
           <p className="text-center text-body-sm text-stone mt-8">

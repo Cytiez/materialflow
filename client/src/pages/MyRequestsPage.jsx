@@ -14,6 +14,11 @@ function TawaranCard({ match, onUpdate }) {
   const [expanded, setExpanded] = useState(false);
 
   const handleStatusChange = async (newStatus) => {
+    // FIX 6: Konfirmasi sebelum terima tawaran
+    if (newStatus === 'accepted') {
+      const ok = confirm(`Terima tawaran dari ${match.company_name}?\n\nDeal akan berjalan dan perlu dikonfirmasi selesai oleh kedua pihak setelah material diterima.`);
+      if (!ok) return;
+    }
     setLoadingStatus(true);
     setStatusError('');
     try {
@@ -57,7 +62,7 @@ function TawaranCard({ match, onUpdate }) {
           <div className="flex items-center gap-2 mb-0.5">
             {isAccepted && (
               <span className="text-[9px] font-bold text-moss tracking-[0.1em] uppercase flex items-center gap-0.5">
-                <span className="material-symbols-outlined text-[11px]">verified</span> DEAL BERJALAN
+                <span className="material-symbols-outlined text-[11px]">handshake</span> DEAL BERJALAN
               </span>
             )}
             {isRejected && (
@@ -131,6 +136,19 @@ function TawaranCard({ match, onUpdate }) {
           {statusError && <p className="text-[10px] text-terracotta text-right">{statusError}</p>}
         </div>
       </div>
+
+      {/* FIX 16: Guidance setelah deal diterima */}
+      {isAccepted && !match.receiver_done && (
+        <div className="mt-3 mx-0 px-4 py-2.5 bg-moss/5 border border-moss/20 rounded-lg">
+          <p className="text-[12px] text-moss font-semibold flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px]">info</span>
+            Langkah selanjutnya
+          </p>
+          <p className="text-[11px] text-stone mt-0.5">
+            Hubungi pengirim untuk koordinasi penyerahan material. Setelah material diterima, klik <strong>"Konfirmasi Selesai"</strong>.
+          </p>
+        </div>
+      )}
 
       {/* Expand detail link */}
       <div className="mt-3 pt-3 border-t border-outline/50 flex justify-between items-center">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import Badge from '../components/common/Badge';
@@ -9,6 +9,8 @@ import ErrorMessage from '../components/common/ErrorMessage';
 export default function ListingDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const justCreated = searchParams.get('created') === '1';
   const { user, isSender } = useAuth();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -129,6 +131,19 @@ export default function ListingDetailPage() {
     <div className="max-w-3xl space-y-6">
       {error && <ErrorMessage message={error} onClose={() => setError('')} />}
       {success && <ErrorMessage message={success} type="success" onClose={() => setSuccess('')} autoDismiss />}
+
+      {/* FIX 15: Guidance banner setelah listing baru dibuat tanpa match */}
+      {justCreated && isOwner && listing?.status === 'active' && (
+        <div className="card-white border border-moss/30 bg-moss/5 flex items-start gap-3">
+          <span className="material-symbols-outlined text-[22px] text-moss mt-0.5 shrink-0">info</span>
+          <div>
+            <p className="text-[13px] font-semibold text-soil">Listing berhasil dibuat!</p>
+            <p className="text-[12px] text-stone mt-0.5">
+              Belum ada receiver yang cocok saat ini. Klik <strong>"Cari Kecocokan"</strong> untuk menjalankan matching, atau tunggu receiver baru mendaftar. Receiver juga bisa menemukan listing Anda langsung dari halaman browse.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Photo */}
       {photoUrl && (
@@ -329,8 +344,8 @@ export default function ListingDetailPage() {
               </button>
             )}
 
-            {/* Cari lagi (force re-match) */}
-            {!listing.is_custom && listing.status === 'matched' && (
+            {/* Cari lagi (force re-match) — hanya untuk active/matched, bukan completed/expired */}
+            {!listing.is_custom && ['active', 'matched'].includes(listing.status) && (
               <button
                 onClick={async () => {
                   setMatching(true);

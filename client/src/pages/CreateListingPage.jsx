@@ -98,7 +98,7 @@ export default function CreateListingPage() {
       if (matchCount > 0) {
         navigate(`/listings/${newListing.id}/matches`);
       } else {
-        navigate(`/listings/${newListing.id}`);
+        navigate(`/listings/${newListing.id}?created=1`);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal membuat listing.');

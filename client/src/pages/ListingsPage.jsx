@@ -16,6 +16,7 @@ export default function ListingsPage() {
     search: '',
     page: 1,
   });
+  const [searchInput, setSearchInput] = useState('');
   const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function ListingsPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setFilters(f => ({ ...f, page: 1 }));
+    setFilters(f => ({ ...f, search: searchInput, page: 1 }));
   };
 
   return (
@@ -61,8 +62,8 @@ export default function ListingsPage() {
             <input
               type="text"
               placeholder="Cari listing..."
-              value={filters.search}
-              onChange={(e) => setFilters(f => ({ ...f, search: e.target.value, page: 1 }))}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="input-field !py-2"
             />
           </div>

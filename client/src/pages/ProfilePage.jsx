@@ -67,6 +67,15 @@ export default function ProfilePage() {
     };
 
     initMap();
+
+    // FIX 10: Cleanup map saat komponen unmount (cegah memory leak)
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      }
+    };
   }, [form?.latitude !== undefined]);
 
   const handleChange = (e) => {

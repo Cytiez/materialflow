@@ -15,6 +15,7 @@ export default function RequestsPage() {
     search: '',
     page: 1,
   });
+  const [searchInput, setSearchInput] = useState('');
   const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
@@ -49,13 +50,13 @@ export default function RequestsPage() {
       {fetchError && <ErrorMessage message={fetchError} onClose={() => setFetchError('')} />}
       {/* Filters */}
       <div className="card-white">
-        <form onSubmit={(e) => e.preventDefault()} className="flex flex-wrap gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); setFilters(f => ({ ...f, search: searchInput, page: 1 })); }} className="flex flex-wrap gap-3">
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
               placeholder="Cari permintaan..."
-              value={filters.search}
-              onChange={(e) => setFilters(f => ({ ...f, search: e.target.value, page: 1 }))}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="input-field !py-2"
             />
           </div>
