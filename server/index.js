@@ -7,6 +7,14 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Validasi env kritis sebelum server jalan
+if (!process.env.DATABASE_URL) {
+  throw new Error('❌ DATABASE_URL harus diset di .env');
+}
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  throw new Error('❌ JWT_SECRET harus diset di .env dan minimal 32 karakter');
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 

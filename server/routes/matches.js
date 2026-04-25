@@ -33,6 +33,11 @@ router.post('/listings/:id/match', authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Listing limbah khusus tidak dapat di-matching.' });
     }
 
+    // FIX 12: Cegah matching pada listing yang sudah completed/expired
+    if (['completed', 'expired'].includes(listing.status)) {
+      return res.status(400).json({ success: false, message: 'Listing ini sudah selesai atau expired, tidak bisa dijalankan matching.' });
+    }
+
     // Return existing matches jika sudah ada dan tidak force
     if (!forceRefresh) {
       const existingCount = await pool.query(
@@ -238,6 +243,20 @@ router.patch('/matches/:id/status', authenticateToken, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Hanya penerima material yang dapat menerima tawaran ini.' });
     }
 
+    // FIX 11: Cegah receiver accept lebih dari satu match untuk request yang sama
+    if (isReceiver && status === 'accepted') {
+      const existingAccepted = await pool.query(
+        "SELECT id FROM matches WHERE request_id = $1 AND status = 'accepted' AND id != $2 LIMIT 1",
+        [match.request_id, matchId]
+      );
+      if (existingAccepted.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Anda sudah menerima tawaran lain untuk permintaan ini. Batalkan deal yang ada terlebih dahulu.'
+        });
+      }
+    }
+
     await pool.query(
       'UPDATE matches SET status = $1, updated_at = NOW() WHERE id = $2',
       [status, matchId]
@@ -248,6 +267,11 @@ router.patch('/matches/:id/status', authenticateToken, async (req, res) => {
       await pool.query(
         "UPDATE waste_listings SET status = 'matched', updated_at = NOW() WHERE id = $1",
         [match.listing_id]
+      );
+      // Auto-reject semua pending match lain untuk request yang sama (1 receiver = 1 deal)
+      await pool.query(
+        "UPDATE matches SET status = 'rejected', updated_at = NOW() WHERE request_id = $1 AND id != $2 AND status = 'pending'",
+        [match.request_id, matchId]
       );
     } else if (status === 'rejected' || status === 'pending') {
       const acceptedCheck = await pool.query(

@@ -159,6 +159,7 @@ CREATE INDEX idx_matches_listing_id ON matches(listing_id);
 CREATE INDEX idx_matches_request_id ON matches(request_id);
 CREATE INDEX idx_matches_status ON matches(status);
 CREATE INDEX idx_matches_score ON matches(score DESC);
+CREATE INDEX idx_matches_listing_status ON matches(listing_id, status);
 
 -- ============================================
 -- TABEL: contact_views

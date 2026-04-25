@@ -9,8 +9,10 @@ const router = express.Router();
 // GET /api/requests — semua request aktif (authenticated)
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const { category_id, status, search, page = 1, limit = 10 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+    const offset = (page - 1) * limit;
+    const { category_id, status, search } = req.query;
     const params = [];
     const conditions = ['mr.deleted_at IS NULL'];
 

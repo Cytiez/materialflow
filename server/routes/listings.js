@@ -11,8 +11,10 @@ const router = express.Router();
 // GET /api/listings — semua listing aktif (authenticated)
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const { category_id, is_custom, status, search, page = 1, limit = 10 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+    const offset = (page - 1) * limit;
+    const { category_id, is_custom, status, search } = req.query;
     const params = [];
     const conditions = ['wl.deleted_at IS NULL'];
 
@@ -80,12 +82,14 @@ router.get('/my', authenticateToken, requireRole('sender'), async (req, res) => 
   try {
     const result = await pool.query(
       `SELECT wl.*, wc.name as category_name, wc.icon as category_icon,
-              (SELECT COUNT(*) FROM matches m WHERE m.listing_id = wl.id) AS match_count,
-              (SELECT COUNT(*) FROM matches m WHERE m.listing_id = wl.id AND m.status = 'pending') AS pending_match_count,
-              (SELECT COUNT(*) FROM matches m WHERE m.listing_id = wl.id AND m.status = 'accepted') AS accepted_match_count
+              COUNT(m.id) AS match_count,
+              COUNT(CASE WHEN m.status = 'pending' THEN 1 END) AS pending_match_count,
+              COUNT(CASE WHEN m.status = 'accepted' THEN 1 END) AS accepted_match_count
        FROM waste_listings wl
        LEFT JOIN waste_categories wc ON wl.category_id = wc.id
+       LEFT JOIN matches m ON m.listing_id = wl.id
        WHERE wl.user_id = $1 AND wl.deleted_at IS NULL
+       GROUP BY wl.id, wc.id
        ORDER BY wl.created_at DESC`,
       [req.user.id]
     );
@@ -380,6 +384,18 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     }
     if (checkResult.rows[0].user_id !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Anda tidak memiliki akses untuk menghapus listing ini.' });
+    }
+
+    // FIX 13: Cegah hapus listing yang sedang dalam deal aktif
+    const activeMatch = await pool.query(
+      "SELECT id FROM matches WHERE listing_id = $1 AND status = 'accepted' LIMIT 1",
+      [listingId]
+    );
+    if (activeMatch.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tidak bisa menghapus listing yang sedang dalam deal aktif. Selesaikan atau batalkan deal terlebih dahulu.'
+      });
     }
 
     await pool.query(
